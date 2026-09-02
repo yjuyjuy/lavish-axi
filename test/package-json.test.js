@@ -17,9 +17,9 @@ test("check script runs all verification commands", async () => {
   ]);
 });
 
-test("committed skill matches the generator stub", async () => {
+test("committed skill matches the generator output", async () => {
   const { createSkillMarkdown } = await import("../src/skill.js");
-  const committed = await readFile(new URL("../skills/lavish/SKILL.md", import.meta.url), "utf8");
+  const committed = await readFile(new URL("../skills/lavish-axi/SKILL.md", import.meta.url), "utf8");
 
   assert.equal(committed, createSkillMarkdown(), "run `npm run build:skill` and commit the result");
 });
@@ -27,7 +27,7 @@ test("committed skill matches the generator stub", async () => {
 test("published package includes the installable skill", async () => {
   const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 
-  assert.ok(packageJson.files.includes("skills/lavish"));
+  assert.ok(packageJson.files.includes("skills/lavish-axi"));
 });
 
 test("published package root is a complete Agent Plugin", async () => {
@@ -36,7 +36,7 @@ test("published package root is a complete Agent Plugin", async () => {
   const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 
   assert.ok(packageJson.files.includes("plugin.json"));
-  assert.ok(packageJson.files.includes("skills/lavish"));
+  assert.ok(packageJson.files.includes("skills/lavish-axi"));
 });
 
 test("release-please keeps the plugin manifest version in step with the package", async () => {
@@ -53,8 +53,8 @@ test("lavish-design agent skill is marked internal for skills CLI discovery", as
   assert.match(frontmatter, /^metadata:\n {2}internal: true$/m);
 });
 
-test("public lavish skill is not marked internal", async () => {
-  const skillMd = await readFile(new URL("../skills/lavish/SKILL.md", import.meta.url), "utf8");
+test("public lavish-axi skill is not marked internal", async () => {
+  const skillMd = await readFile(new URL("../skills/lavish-axi/SKILL.md", import.meta.url), "utf8");
   const frontmatter = skillMd.slice(4, skillMd.indexOf("\n---\n", 4));
 
   assert.doesNotMatch(frontmatter, /^metadata:\n {2}internal: true$/m);

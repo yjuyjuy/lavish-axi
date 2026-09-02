@@ -13,11 +13,11 @@ import {
   validateSkillMarkdown,
 } from "../src/skill.js";
 
-test("createSkillMarkdown emits valid frontmatter naming the lavish skill", () => {
+test("createSkillMarkdown emits valid frontmatter naming the lavish-axi skill", () => {
   const { frontmatter, errors } = parseSkillFrontmatter(createSkillMarkdown());
 
   assert.deepEqual(errors, [], "frontmatter parses as plain block-style YAML");
-  assert.equal(frontmatter.name, "lavish");
+  assert.equal(frontmatter.name, "lavish-axi");
   assert.equal(frontmatter.description, SKILL_DESCRIPTION);
 });
 
@@ -36,7 +36,7 @@ test("createSkillMarkdown emits Hermes Agent metadata as string-valued frontmatt
 test("createSkillMarkdown conforms to the Agent Skills frontmatter contract", () => {
   // Agent Plugins delegates skill validity to Agent Skills and silently skips any skill
   // that fails it, so a regression here would quietly remove the skill from the plugin.
-  const { valid, errors } = validateSkillMarkdown(createSkillMarkdown(), { directoryName: "lavish" });
+  const { valid, errors } = validateSkillMarkdown(createSkillMarkdown(), { directoryName: "lavish-axi" });
 
   assert.deepEqual(errors, []);
   assert.ok(valid);
@@ -70,7 +70,7 @@ test("validateSkillMarkdown rejects the shapes the reference validator rejects",
   assert.match(validateSkillMarkdown(missing).errors.join("\n"), /`description` is required/);
 });
 
-test("createSkillMarkdown handles explicit /lavish invocation arguments", () => {
+test("createSkillMarkdown handles explicit /lavish-axi invocation arguments", () => {
   const md = createSkillMarkdown();
   const body = md.slice(md.indexOf("\n---\n", 4) + 5);
 
@@ -78,14 +78,15 @@ test("createSkillMarkdown handles explicit /lavish invocation arguments", () => 
   assert.match(body, /empty/i, "explains the model-invoked case where no arguments are passed");
 });
 
-test("createSkillMarkdown stays a short stub that defers to the CLI", () => {
+test("createSkillMarkdown follows the five-section template and defers to the CLI", () => {
   const md = createSkillMarkdown();
 
   assert.ok(md.length <= MAX_SKILL_MARKDOWN_CHARS, "the generated skill stays drastically smaller than CLI guidance");
-  assert.match(md, /Lavish Editor/);
-  assert.match(md, /`npx -y lavish-axi --help`/);
-  assert.match(md, /`npx -y lavish-axi design`/);
-  assert.match(md, /`npx -y lavish-axi playbook <id>`/);
+  for (const heading of ["## When to reach for it", "## Workflows", "## Conventions", "## Non-goals"]) {
+    assert.ok(md.includes(heading), `template section \`${heading}\` is present`);
+  }
+  assert.match(md, /lavish-axi design/);
+  assert.match(md, /lavish-axi playbook <id>/);
   assert.match(md, /stale/i);
 });
 
@@ -109,10 +110,12 @@ test("createSkillMarkdown does not bake CLI-owned guidance into the skill", () =
   assert.ok(!md.includes(PLAYBOOK_ROUTER_HELP), "must not copy playbook-router help");
   assert.ok(!md.includes(DESIGN_PRIORITY_RULE), "must not copy the design-priority rule");
   assert.doesNotMatch(md, /self_paint_warning/);
-  assert.doesNotMatch(md, /## Workflow/);
   assert.doesNotMatch(md, /## Visual guidance/);
   assert.doesNotMatch(md, /## Playbooks/);
   assert.doesNotMatch(md, /## Commands & rules/);
+  // Help-derivable content is banned: `--help` is current, an installed skill is not.
+  assert.doesNotMatch(md, /^Usage:/m);
+  assert.doesNotMatch(md, /--timeout-ms/);
 });
 
 test("createSkillMarkdown does not leak live session state", () => {
@@ -131,9 +134,7 @@ test("createSkillMarkdown omits setup guidance", () => {
 test("createSkillMarkdown uses non-interactive npx commands", () => {
   const md = createSkillMarkdown();
 
-  assert.match(md, /`npx -y lavish-axi <html-file>`/);
-  assert.match(md, /If lavish-axi output shows a follow-up command starting with `lavish-axi`/);
-  assert.match(md, /run it as `npx -y lavish-axi/);
+  assert.match(md, /`npx -y lavish-axi \.\.\.`/);
   assert.doesNotMatch(md, /`npx lavish-axi/);
   assert.doesNotMatch(md, /Run `lavish-axi/);
 });
